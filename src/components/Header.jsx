@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { CogIcon } from "@heroicons/react/24/outline"; // optional icon
 
 export default function Header() {
   return (
@@ -18,7 +19,7 @@ export default function Header() {
           <Link className="text-gray-700 hover:text-black" to="/properties">
             Properties
           </Link>
-          <Link className="text-gray-700 hover:text-black" to="/properties">
+          <Link className="text-gray-700 hover:text-black" to="/account/dashboard">
             Dashboard
           </Link>
           <Link className="text-gray-700 hover:text-black" to="/about">

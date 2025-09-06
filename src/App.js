@@ -1,19 +1,9 @@
-// src/App.jsx
+// src/AppRoutes.jsx
 import React from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  Outlet,
-} from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext"; //  ✅ correct path
+import { Routes, Route, Navigate } from "react-router-dom";
 
-// common UI
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-
-// public pages
+// Public layout & pages
+import PublicLayout from "./layouts/PublicLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -22,66 +12,61 @@ import PropertyDetails from "./pages/PropertyDetails";
 import About from "./pages/About";
 import TermsAndConditions from "./pages/TermsAndConditions";
 
-// protected dashboards
-import AdminDashboard from "./pages/AdminDashboard";
+// User dashboard pages
 import Dashboard from "./pages/account/Dashboard";
+import Investment from "./pages/account/Investment";
+import Transaction from "./pages/account/Transaction";
+import Withdraw from "./pages/account/Withdraw";
+import AccountSettings from "./pages/account/AccountSettings";
 
-/* ---------- Public layout (Header + Footer) ---------- */
-function PublicLayout() {
-  return (
-    <>
-      <Header />
-      <Outlet />
-      <Footer />
-    </>
-  );
-}
+// Admin pages
+import Layout from "./layouts/AdminLayout";
+// import AdminDashboard from "./pages/admin/Dashboard";
+import AdminPropertyList from "./pages/admin/PropertyList";
+import AdminCreateProperty from "./pages/admin/CreateProperty";
+import AdminEditProperty from "./pages/admin/EditProperty";
+import AdminDashboard from './pages/admin/AdminDashboard';
 
-/* ---------- Protected route wrapper ---------- */
-function ProtectedRoute({ role }) {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to="/login" replace />;
-  return <Outlet />;
-}
+// Route guards
+import PrivateRoute from "./routes/PrivateRoute";
+import AdminRoute from "./routes/AdminRoute";
 
-/* ---------- All routes ---------- */
-function AppRoutes() {
+export default function AppRoutes() {
   return (
     <Routes>
-      {/* public routes with Header & Footer */}
+      {/* 1. Public routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/properties" element={<Properties />} />
-        <Route path="/property/:id" element={<PropertyDetails />} />
+        <Route path="/property/:slug" element={<PropertyDetails />} />
         <Route path="/about" element={<About />} />
         <Route path="/termsandcondition" element={<TermsAndConditions />} />
       </Route>
 
-      {/* protected routes (no Header/Footer) */}
-      <Route element={<ProtectedRoute role="user" />}>
-        <Route path="/dashboard/user" element={<Dashboard />} />
+      {/* 2. User dashboard (protected) */}
+      <Route element={<PrivateRoute />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/investment" element={<Investment />} />
+        <Route path="/dashboard/transaction" element={<Transaction />} />
+        <Route path="/dashboard/withdraw" element={<Withdraw />} />
+        <Route path="/dashboard/account" element={<AccountSettings />} />
       </Route>
 
-      <Route element={<ProtectedRoute role="admin" />}>
-        <Route path="/admin" element={<AdminDashboard />} />
+      {/* 3. Admin panel (protected + layout) */}
+      <Route element={<AdminRoute />}>
+        <Route element={<Layout />}>
+          {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+          <Route path="/admin" element={<AdminDashboard/>} />
+          <Route path="/admin/properties" element={<AdminPropertyList />} />
+          <Route path="/admin/properties/create" element={<AdminCreateProperty />} />
+          <Route path="/admin/properties/edit/:id" element={<AdminEditProperty />} />
+        </Route>
       </Route>
 
-      {/* catch-all */}
+      {/* 4. 404 fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  );
-}
-
-/* ---------- Root ---------- */
-export default function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
   );
 }

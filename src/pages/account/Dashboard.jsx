@@ -1,6 +1,5 @@
 // src/pages/account/Dashboard.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import {
   HomeIcon,
@@ -9,22 +8,20 @@ import {
   ArrowTrendingUpIcon,
   EyeIcon,
   HeartIcon,
-  CalendarDaysIcon,
+  CalendarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
 } from '@heroicons/react/24/outline';
-import { userApi } from '../../api/user';
+import { userApi } from "../../api/UserApi";
+
+
 
 const fmtMoney = (n) =>
   typeof n === 'number'
     ? n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
     : '—';
 
-const formatShortDate = (d) =>
-  d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-
 export default function Dashboard() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState(null);
   const [stats, setStats] = useState(null);
@@ -38,7 +35,7 @@ export default function Dashboard() {
         setMe(meRes.data);
         setStats(statRes.data);
       } catch (e) {
-        setError(e?.message || 'Could not load dashboard');
+        setError(e.message || 'Failed to load dashboard');
       } finally {
         setLoading(false);
       }
@@ -51,33 +48,33 @@ export default function Dashboard() {
       {
         name: 'Total Properties',
         value: String(s.totalProperties ?? 0),
-        change: '+2',
-        changeType: 'increase',
-        Icon: HomeIcon,
+        change: null,
+        changeType: null,
+        icon: HomeIcon,
         color: 'bg-blue-500',
       },
       {
         name: 'Portfolio Value',
         value: fmtMoney(s.portfolioValue ?? 0),
-        change: '+12.5%',
-        changeType: 'increase',
-        Icon: CurrencyDollarIcon,
+        change: null,
+        changeType: null,
+        icon: CurrencyDollarIcon,
         color: 'bg-green-500',
       },
       {
         name: 'Monthly Income',
         value: fmtMoney(s.monthlyIncome ?? 0),
-        change: '+8.2%',
-        changeType: 'increase',
-        Icon: ArrowTrendingUpIcon,
+        change: null,
+        changeType: null,
+        icon: ArrowTrendingUpIcon,
         color: 'bg-purple-500',
       },
       {
         name: 'ROI',
         value: typeof s.roi === 'number' ? `${s.roi.toFixed(2)}%` : '0%',
-        change: '-2.1%',
-        changeType: 'decrease',
-        Icon: ChartBarIcon,
+        change: null,
+        changeType: null,
+        icon: ChartBarIcon,
         color: 'bg-orange-500',
       },
     ];
@@ -125,7 +122,7 @@ export default function Dashboard() {
       type: 'Purchase',
       property: 'Ocean View Apartment',
       amount: '$850,000',
-      date: '2025-08-30',
+      date: '2025-01-10',
       status: 'Completed',
     },
     {
@@ -133,7 +130,7 @@ export default function Dashboard() {
       type: 'Sale',
       property: 'Downtown Office Space',
       amount: '$1,200,000',
-      date: '2025-08-28',
+      date: '2025-01-08',
       status: 'Completed',
     },
     {
@@ -141,7 +138,7 @@ export default function Dashboard() {
       type: 'Rental Income',
       property: 'Luxury Villa',
       amount: '$4,500',
-      date: '2025-08-25',
+      date: '2025-01-05',
       status: 'Received',
     },
   ];
@@ -149,7 +146,6 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Welcome Banner */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl p-8 text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -157,12 +153,12 @@ export default function Dashboard() {
                 {loading ? 'Loading…' : `Welcome back, ${me?.name?.split(' ')[0] || 'Investor'}!`}
               </h1>
               <p className="text-blue-100 text-lg">
-                Here's what's happening with your properties today.
+                Here&apos;s what&apos;s happening with your properties today.
               </p>
             </div>
             <div className="hidden md:block">
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                <CalendarDaysIcon className="w-12 h-12 text-white" />
+                <CalendarIcon className="w-12 h-12 text-white" />
               </div>
             </div>
           </div>
@@ -174,7 +170,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {(loading ? Array.from({ length: 4 }) : statCards).map((stat, idx) => {
             if (loading) {
@@ -189,12 +184,9 @@ export default function Dashboard() {
                 </div>
               );
             }
-            const Icon = stat.Icon;
+            const Icon = stat.icon;
             return (
-              <div
-                key={stat.name}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
-              >
+              <div key={stat.name} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">{stat.name}</p>
@@ -217,9 +209,7 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
-                  <div
-                    className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}
-                  >
+                  <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                 </div>
@@ -228,49 +218,48 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* Recent Properties */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-blue-900">Recent Properties</h2>
             </div>
             <div className="p-6 space-y-4">
-              {recentProperties.map((p) => (
+              {recentProperties.map((property) => (
                 <div
-                  key={p.id}
+                  key={property.id}
                   className="flex items-center space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors"
                 >
                   <img
-                    src={p.image}
-                    alt={p.title}
+                    src={property.image}
+                    alt={property.title}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{p.title}</h3>
-                    <p className="text-sm text-gray-600">{p.location}</p>
+                    <h3 className="font-semibold text-gray-900 truncate">{property.title}</h3>
+                    <p className="text-sm text-gray-600">{property.location}</p>
                     <div className="flex items-center space-x-4 mt-2">
-                      <span className="text-lg font-bold text-blue-600">{p.price}</span>
+                      <span className="text-lg font-bold text-blue-600">{property.price}</span>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          p.status === 'Active'
+                          property.status === 'Active'
                             ? 'bg-green-100 text-green-800'
-                            : p.status === 'Sold'
+                            : property.status === 'Sold'
                             ? 'bg-gray-100 text-gray-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}
                       >
-                        {p.status}
+                        {property.status}
                       </span>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center space-x-2 text-sm text-gray-500">
                       <EyeIcon className="w-4 h-4" />
-                      <span>{p.views}</span>
+                      <span>{property.views}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
                       <HeartIcon className="w-4 h-4" />
-                      <span>{p.likes}</span>
+                      <span>{property.likes}</span>
                     </div>
                   </div>
                 </div>
@@ -278,7 +267,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Recent Transactions */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-blue-900">Recent Transactions</h2>
@@ -312,7 +300,7 @@ export default function Dashboard() {
                     <div>
                       <h3 className="font-semibold text-gray-900">{tx.type}</h3>
                       <p className="text-sm text-gray-600">{tx.property}</p>
-                      <p className="text-xs text-gray-500">{formatShortDate(tx.date)}</p>
+                      <p className="text-xs text-gray-500">{tx.date}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -327,28 +315,18 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-blue-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              onClick={() => navigate('/properties/add')}
-              className="flex items-center justify-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
-            >
+            <button className="flex items-center justify-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
               <HomeIcon className="w-6 h-6 text-gray-400" />
               <span className="font-medium text-gray-700">Add New Property</span>
             </button>
-            <button
-              onClick={() => navigate('/analytics')}
-              className="flex items-center justify-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
-            >
+            <button className="flex items-center justify-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors">
               <ChartBarIcon className="w-6 h-6 text-gray-400" />
               <span className="font-medium text-gray-700">View Analytics</span>
             </button>
-            <button
-              onClick={() => navigate('/invest')}
-              className="flex items-center justify-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors"
-            >
+            <button className="flex items-center justify-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors">
               <CurrencyDollarIcon className="w-6 h-6 text-gray-400" />
               <span className="font-medium text-gray-700">Make Investment</span>
             </button>

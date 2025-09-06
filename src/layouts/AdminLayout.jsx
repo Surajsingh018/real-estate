@@ -1,6 +1,6 @@
 // src/layouts/AdminLayout.jsx
 import { Outlet } from "react-router-dom";
-import { PropertyProvider } from "../context/PropertyContext";
+import { PropertyProvider } from "../context/DashbordContext";
 
 export default function AdminLayout() {
   return (
